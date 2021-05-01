@@ -1,0 +1,6 @@
+#object and asm files
+**/*.o
+**/*.s
+
+src/a.out
+src/test*
