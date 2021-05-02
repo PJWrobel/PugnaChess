@@ -1,2 +1,2 @@
 # PugnaChess
-C chess engine, x86 and wasm compatible.
+C chess engine, x86-64i, arm64, and wasm builds available..
