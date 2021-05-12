@@ -99,6 +99,14 @@ struct pieceList
     BitBoard bbList[7];
 }pieceList;
 
+void printPieces(struct pieceList pl)
+{   for(int i = bitscan(pl.pieces); pl.pieces ^= i; i = bitscan(pl.pieces))
+    {   
+        printf("%c:\n", BitEnumToChar(i));
+        printBB(pl.bbList[LOG2[i]]);
+    }
+}
+
 
 typedef struct Board
 {   struct pieceList white, black;
@@ -189,6 +197,9 @@ void printBoard(Board board)
     int WMat, BMat; //white and black material
     piece *white = pieces(&WMat, board.white);
     piece *black = pieces(&BMat, board.black);
+    printPieces(board.white);
+    puts("Black:");
+    printPieces(board.black);
     for(int i=0; i<WMat; i++)
     {   int *coords = BBToCoord(white[i].square);
         grid[ coords[1] ][ coords[0] ] = BitEnumToChar(white[i].type);
