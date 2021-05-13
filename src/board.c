@@ -5,13 +5,23 @@
 * Bitboard orientation:  "b5" := ( x=1, y=4 )  
 */
 
-
 #include<stdio.h>
 #include<stdlib.h>
 #include<stdint.h>
 #include<string.h>
 
 #define bitscan(bb) (bb & -bb)                      //you know it
+#define BitBoard uint64_t
+
+#define WHITEMOVE 1
+#define BLACKMOVE 
+#define WK_CASTLE 2
+#define WQ_CASTLE 4
+#define BK_CASTLE 8
+#define BQ_CASTLE 16
+//#define 
+//#define
+//#define
 
 //------------------------BitEnum-----------------------------
 
@@ -24,11 +34,10 @@
 #define R 8
 #define B 16
 #define N 32
-#define D 64
 
-const BitEnum LOG2[65] = { [K] = 1, [P] = 2, [Q] = 3, [R] = 4, [B] = 5, [N] = 6, [D] = 7 };   //log2 table for single bit BitEnums
+const BitEnum LOG2[33] = { [K] = 1, [P] = 2, [Q] = 3, [R] = 4, [B] = 5, [N] = 6 };   //log2 table for single bit BitEnums
 
-BitEnum charToBitEnum(char c)           //piece character to corresponding BitEnum
+BitEnum charToBitEnum(char c)           //piece character to corresponding BitEnum TODO: remake into dict?
 {   c &= ~0x20;                         //make all chars uppercase (all non-chars removed prior)
     switch(c)
     {   case 'K':
@@ -43,8 +52,6 @@ BitEnum charToBitEnum(char c)           //piece character to corresponding BitEn
             return N;
         case 'P':
             return P;
-        case 'D':
-            return D;
         default: return -1; //TODO: ERR
     }
 }
@@ -62,14 +69,10 @@ char BitEnumToChar(BitEnum be)
             return 'N';
         case P:
             return 'P';
-        case D:
-            return 'D';
         default: return -1; //TODO: ERR
     }
 }
 //------------------------------------------------------------
-
-#define BitBoard uint64_t
 
 typedef struct piece
 {   BitEnum type;
@@ -87,10 +90,11 @@ typedef struct Board
     BitBoard Wall;
     BitBoard Ball;
     BitEnum state;
+    BitBoard passant;
 }Board;
 
 int board_init(Board *b) //init clear board
-{   *b = (Board){ .white = {0, {0} }, .black = {0, {0} }, .state = 0 };
+{   *b = (Board){ .white = {0, {0} }, .black = {0, {0} }, .Wall = 0, .Ball = 0, .state = 0, .passant = 0 };
     return 0;
 }
 
@@ -100,25 +104,24 @@ BitBoard coordToBB(int row, int col)
     return bb;
 }      //bitboard mask for 8x8 coords
 
-uint64_t BBbitscanRemove(uint64_t *bb) //either BB or BE
+uint64_t bitscanRemove(uint64_t *bb) //either BB or BE
 {   BitBoard ret = bitscan(*bb);
     *bb ^= ret;
     return ret;
 }
-void printBB(BitBoard bb)                           //top left to bottom right
-{   BitBoard mask = 0x0100000000000000;             // 1 << 56, top left of board
-    for(int i=0; i<8; i++)
-    {   for(int j=0; j<8; j++, mask <<= 1) 
-            printf("%c", bb & mask ? '1' : 'O');
-        mask >>= 16;                                //column 1 of next row
-        if(!mask)                                   //mask overflows after first iteration
-            mask = 0x1000000000000;
-        printf("\n");
+
+void printBB(BitBoard bb)                           
+{   BitBoard mask;
+    for(int i=7; i>=0; i--)          //top left to bottom right
+    {   for(int j=0; j<8;j++)
+            printf("%c", bb & coordToBB(i,j) ? 'X' : 'O');
+        puts("");
     }
 }
+
 int* BBToCoord(BitBoard bb)
 {   int rank, file;
-    BitBoard mask = 0x101010101010101;             //1's on h column
+    BitBoard mask = 0x101010101010101;             //1's on a column
     for(file = 0; ! (mask & bb); file++, bb >>= 1); //shift board left until piece in a column
     for(rank = 0; bb; rank++, bb >>= 8);
     int *coords = malloc(8); //TODO: free?
@@ -128,10 +131,11 @@ int* BBToCoord(BitBoard bb)
 }
 
 void printPieces(struct pieceList pl)
-{   for(int i = bitscan(pl.pieces); pl.pieces ^= i; i = bitscan(pl.pieces))
+{   for(int i = bitscan(pl.pieces); i; i = bitscan(pl.pieces))
     {   
         printf("%c:\n", BitEnumToChar(i));
         printBB(pl.bbList[LOG2[i]]);
+        pl.pieces ^= i;
     }
 }
 
@@ -140,61 +144,6 @@ void printPieces(struct pieceList pl)
 void addPiece(struct pieceList *list, BitEnum type, BitBoard square)//list as param for color handling
 {   list->pieces |= type;
     list->bbList[ LOG2[ type ]] |= square;
-}
-
-Board fenToBoard(char *fen)
-{   
-    Board returnBoard;
-    board_init(&returnBoard);
-    BitBoard mask;
-    for(int i = 7; i >= 0; i--)
-    {   for(int j = 0; j < 9; j++, fen++)
-        {   mask = coordToBB(i,j); //money
-            //printBB(mask);
-            //puts("");
-            switch(*fen)
-            {   
-            case '1'...'8':
-                j += *fen -49;
-                break;
-            case 'K':
-            case 'Q':
-            case 'R':
-            case 'B':
-            case 'N':
-            case 'P':
-                addPiece(&returnBoard.white, charToBitEnum(*fen), coordToBB(i,j));
-                returnBoard.Wall |= coordToBB(i,j);
-                break;
-            case 'k':
-            case 'q':
-            case 'r':
-            case 'b':
-            case 'n':
-            case 'p':
-                addPiece(&returnBoard.black, charToBitEnum(*fen), coordToBB(i,j));
-                returnBoard.Wall |= coordToBB(i,j);
-                break;
-            case '/':
-                if(j != 8){
-                    //TODO: ERR
-                    printf("ERROR: (%d,%d):%c\n",i,j,*fen);
-                }
-                break;
-            case ' ':
-                if(i==0 && j==8)
-                    break; //else default
-            default: 
-                printf("ERROR: DEFAULT: (%d,%d):%c\n",i,j,*fen);
-                return returnBoard;
-            }
-        }
-    }
-
-    //if(*fen == 'w')
-    //    returnBoard.state |= WHITEMOVE
-    //else if(*fen == 'b')
-    return returnBoard;
 }
 
 piece* pieces(int *returnSize, struct pieceList list)
@@ -211,6 +160,7 @@ piece* pieces(int *returnSize, struct pieceList list)
     }
     return retList;
 }
+
 void printBoard(Board board)
 {   
     int WMat, BMat; //white and black material
@@ -242,12 +192,126 @@ void printBoard(Board board)
     }
 }
 
+Board fenToBoard(char *fen)
+{   
+    Board returnBoard;
+    board_init(&returnBoard);
+    BitBoard mask;
+
+    for(int i = 7; i >= 0; i--)
+    {   for(int j = 0; j < 9; j++, fen++)
+        {   
+            mask = coordToBB(i,j);
+            switch(*fen)
+            {   
+            case '1'...'8':
+                j += *fen -49;
+                break;
+            case 'K':
+            case 'Q':
+            case 'R':
+            case 'B':
+            case 'N':
+            case 'P':
+                addPiece(&returnBoard.white, charToBitEnum(*fen), mask);
+                returnBoard.Wall |= mask;
+                break;
+            case 'k':
+            case 'q':
+            case 'r':
+            case 'b':
+            case 'n':
+            case 'p':
+                addPiece(&returnBoard.black, charToBitEnum(*fen), mask);
+                returnBoard.Ball |= mask;
+                break;
+            case '/':
+                if(j == 8)
+                    break;
+                //else continue to default
+            case ' ':
+                if(i==0 && j==8)
+                    break; //else default
+            default: 
+                printf("ERROR FEN: (%d,%d):%c\n",i,j,*fen);
+                return returnBoard;
+            }
+        }
+    }
+
+    if(*fen == 'w')
+        returnBoard.state |= WHITEMOVE;
+    else if(*fen == 'b')
+        returnBoard.state ^= WHITEMOVE;
+    else{puts("E1"); return returnBoard;}
+    fen++;
+    if(*fen != ' '){puts("E2"); return returnBoard;}
+    fen++;
+    for(int i=0; i<4; i++, fen++)
+    {   switch(*fen)
+        {
+        case 'K':
+            returnBoard.state |= WK_CASTLE;
+            break;
+        case 'Q':
+            returnBoard.state |= WQ_CASTLE;
+        case 'k':
+            returnBoard.state |= BK_CASTLE;
+        case 'q':
+            returnBoard.state |= BQ_CASTLE;
+        case '-':
+            if(i){puts("E3"); return returnBoard;}
+            i = 4;
+            fen++;
+            if(*fen != ' '){puts("E4"); return returnBoard;}
+            break;
+        case ' ':
+            if(!i){puts("E5"); return returnBoard;}
+            i = 4;
+        }
+    }
+    switch(*fen) //en passant square, must be in rank 3 (white) or 6 (black)
+    {   case '-':
+            break;
+        case 'a'...'h':
+            fen++;
+            if(*fen == '3' || *fen == '6')
+                returnBoard.passant = coordToBB(*fen - 49, *(fen-1) - 97);//TODO.
+            
+            else{puts("E6"); return returnBoard;}
+            break;
+        default:
+            puts("E7");
+            return returnBoard;
+    }
+    fen++;
+    if(*fen != ' '){puts("E8"); return returnBoard;}
+
+    fen++;
+    switch(*fen) //not doing 50 move rule, no atoi so fen is properly placed following
+    {   case '0'...'9':
+            fen++;
+            if(*fen == ' ')
+                break;
+            fen++; //if num is 2-digit
+            if(*fen == ' ')
+                break;
+            //else continue;
+        default:
+            puts("E9");
+            return returnBoard;
+    }
+    fen++;
+    int moves = atoi(fen);
+    return returnBoard;
+}
+
 int main()
-{   char *fen = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1";
+{   char *fen = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e3 0 1";
     Board board = fenToBoard(fen);
-    //printBB(coordToBB(7,0));
+    printBB(board.Wall);
     printBoard(board);
 
-    //printf("%zu\n", sizeof(Board));
+    printf("%zu\n", sizeof(Board));
     return 0;
 }
