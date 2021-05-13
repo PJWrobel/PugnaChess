@@ -194,6 +194,8 @@ piece* pieces(int *returnSize, struct pieceList list)
 }
 void printBoard(Board board)
 {   char grid[8][8] = {0};
+    for(int i=0; i<64; i++)
+        grid[i/8][i%8] = ' ';
     int WMat, BMat; //white and black material
     piece *white = pieces(&WMat, board.white);
     piece *black = pieces(&BMat, board.black);
