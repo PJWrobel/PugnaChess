@@ -119,8 +119,7 @@ int* BBToCoord(BitBoard bb)
 
 
 void printBB(BitBoard bb)                           
-{   BitBoard mask;
-    for(int i=7; i>=0; i--)          //top left to bottom right
+{   for(int i=7; i>=0; i--)          //top left to bottom right
     {   for(int j=0; j<8;j++)
             printf("%c ", bb & coordToBB(i,j) ? '1' : '.');
         puts("");
@@ -329,7 +328,7 @@ Board fenToBoard(char *fen)
             return returnBoard;
     }
     fen++;
-    int moves = atoi(fen);
+    //int moves = atoi(fen);
     puts("Sucess!");
     return returnBoard;
 }
