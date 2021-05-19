@@ -11,17 +11,13 @@
 #include<string.h>
 #include<stdbool.h>
 
-#define bitscan(bb) (bb & -bb)                      //you know it
-#define BitBoard uint64_t
+#include "bitboard.h"
 
 #define WHITEMOVE 1 
 #define WK_CASTLE 2
 #define WQ_CASTLE 4
 #define BK_CASTLE 8
 #define BQ_CASTLE 16
-//#define 
-//#define
-//#define
 
 //------------------------BitEnum-----------------------------
 
@@ -96,35 +92,6 @@ typedef struct Board
 int board_init(Board *b) //init clear board
 {   *b = (Board){ .white = {0, {0} }, .black = {0, {0} }, .Wall = 0, .Ball = 0, .state = 0, .passant = 0 };
     return 0;
-}
-
-BitBoard coordToBB(int row, int col)
-{   BitBoard bb = 1;
-    bb <<= row*8 + col;
-    return bb;
-}      //bitboard mask for 8x8 coords
-
-int* BBToCoord(BitBoard bb)
-{   if(!bb)
-        return NULL;
-    int rank, file;
-        BitBoard mask = 0x101010101010101;             //1's on column a
-    for(file = 0; ! (mask & bb); file++, bb >>= 1);    //shift board left until piece in a column
-    for(rank = 0; bb; rank++, bb >>= 8);
-    int *coords = malloc(8); //TODO: free?
-    coords[0] = file;
-    coords[1] = rank-1;
-    return coords;
-}
-
-
-void printBB(BitBoard bb)                           
-{   for(int i=7; i>=0; i--)          //top left to bottom right
-    {   for(int j=0; j<8;j++)
-            printf("%c ", bb & coordToBB(i,j) ? '1' : '.');
-        puts("");
-    }
-    puts("");
 }
 
 void printPieces(struct pieceList pl)
@@ -334,7 +301,7 @@ Board fenToBoard(char *fen)
 }
 
 int main(int argc, char *argv[])
-{   char *fen = "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 11";
+{   char *fen = "r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w - - 0 11";
     Board board = fenToBoard(fen);
     printBoard(board,true);
 
