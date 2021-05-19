@@ -98,20 +98,6 @@ int board_init(Board *b) //init clear board
     return 0;
 }
 
-/*piece*void moves(Board *b)
-{   struct pieceList pl = b->state & WHITEMOVE ? &b->white : &b->black;
-    
-    register BitBoard wall = b->Wall;
-    register BitBoard ball = b->Ball;
-    register BitBoard attacks = 0;
-    register BitBoard remain = pl.bbList[0]; //king
-    register BitBoard piece; //no bitscan for one king.
-    //you know what ignore this shit im not doing king until last.
-    remain = pl.bbList[1];//queen
-    
-
-
-}*/
 BitBoard coordToBB(int row, int col)
 {   BitBoard bb = 1;
     bb <<= row*8 + col;
@@ -122,8 +108,8 @@ int* BBToCoord(BitBoard bb)
 {   if(!bb)
         return NULL;
     int rank, file;
-    BitBoard mask = 0x101010101010101;             //1's on a column
-    for(file = 0; ! (mask & bb); file++, bb >>= 1); //shift board left until piece in a column
+        BitBoard mask = 0x101010101010101;             //1's on column a
+    for(file = 0; ! (mask & bb); file++, bb >>= 1);    //shift board left until piece in a column
     for(rank = 0; bb; rank++, bb >>= 8);
     int *coords = malloc(8); //TODO: free?
     coords[0] = file;
