@@ -11,4 +11,4 @@ ifeq ($(BUILD), debug)
 endif
 
 $(PROJECT_NAME): $(SOURCE)
-	$(CC) $(SOURCE) -o $(PROJECT_NAME) $(FLAGS) $(LINKS)
+	$(CC) -o $(PROJECT_NAME) $(SOURCE) $(FLAGS) $(LINKS)

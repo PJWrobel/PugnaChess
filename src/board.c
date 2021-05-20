@@ -301,7 +301,7 @@ Board fenToBoard(char *fen)
 }
 
 int main(int argc, char *argv[])
-{   char *fen = "r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w - - 0 11";
+{   char *fen = "r1bqkb1r/pppp1ppp/2Bn4/4p3/3P4/5N2/PPP2PPP/RNBQ1RK1 w - - 0 11";
     Board board = fenToBoard(fen);
     printBoard(board,true);
 

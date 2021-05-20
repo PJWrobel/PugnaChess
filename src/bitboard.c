@@ -26,7 +26,27 @@ int* BBToCoord(BitBoard bb)
     coords[1] = rank-1;
     return coords;
 }
+_Bool isPopCnt1(BitBoard bb){return bb & (bb-1)}
 
+size_t popCount (BitBoard bb)   //chessprogramming.org/Population_Count
+{  size_t count = 0;
+   while (bb) {
+       count++;
+       bb &= bb - 1; // reset LS1B
+   }
+   return count;
+}
+const U64 k1 = C64(0x5555555555555555); /*  -1/3   */
+const U64 k2 = C64(0x3333333333333333); /*  -1/5   */
+const U64 k4 = C64(0x0f0f0f0f0f0f0f0f); /*  -1/17  */
+const U64 kf = C64(0x0101010101010101); /*  -1/255 */       //also taken from cpw
+int popCount (U64 x)
+{   bb =  bb       - ((bb >> 1)  & k1); /* put count of each 2 bits into those 2 bits */
+    bb = (bb & k2) + ((bb >> 2)  & k2); /* put count of each 4 bits into those 4 bits */
+    bb = (bb       +  (bb >> 4)) & k4 ; /* put count of each 8 bits into those 8 bits */
+    bb = (bb * kf) >> 56; /* returns 8 most significant bits of x + (x<<8) + (x<<16) + (x<<24) + ...  */
+    return (int) bb;
+}
 
 void printBB(BitBoard bb)
 {   for(int i=7; i>=0; i--)          //top left to bottom right
