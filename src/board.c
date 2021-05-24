@@ -90,7 +90,7 @@ typedef struct Board
 }Board;
 
 int board_init(Board *b) //init clear board
-{   *b = (Board){ .white = {0, {0} }, .black = {0, {0} }, .Wall = 0, .Ball = 0, .state = 0, .passant = 0 };
+{   *b = calloc(1, sizeof(Board));
     return 0;
 }
 

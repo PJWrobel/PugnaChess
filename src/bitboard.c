@@ -36,10 +36,10 @@ size_t popCount (BitBoard bb)   //chessprogramming.org/Population_Count
    }
    return count;
 }
-const U64 k1 = C64(0x5555555555555555); /*  -1/3   */
-const U64 k2 = C64(0x3333333333333333); /*  -1/5   */
-const U64 k4 = C64(0x0f0f0f0f0f0f0f0f); /*  -1/17  */
-const U64 kf = C64(0x0101010101010101); /*  -1/255 */       //also taken from cpw
+const BitBoard k1 = C64(0x5555555555555555); /*  -1/3   */
+const BitBoard k2 = C64(0x3333333333333333); /*  -1/5   */
+const BitBoard k4 = C64(0x0f0f0f0f0f0f0f0f); /*  -1/17  */
+const BitBoard kf = C64(0x0101010101010101); /*  -1/255 */       //also taken from cpw
 int popCount (U64 x)
 {   bb =  bb       - ((bb >> 1)  & k1); /* put count of each 2 bits into those 2 bits */
     bb = (bb & k2) + ((bb >> 2)  & k2); /* put count of each 4 bits into those 4 bits */
