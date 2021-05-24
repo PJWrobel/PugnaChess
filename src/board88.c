@@ -4,29 +4,29 @@
 //#inclued<>
 
 
-//------------ASCII definitions--------
 
-#define WKING 'K'
-#define WQUEEN 'Q'
-#define WROOK 'R'
-#define WBISHOP 'B'
-#define WKNIGHT 'N'
-#define WPAWN 'P'
-#define BKING 'k'
-#define BQUEEN 'q'
+
+#define EMPTY '.'
+
+//-------------data indexes----------------
+
+#define WHITEPIECE(index) square & 0x7F
+
+#define WKING 8
+#define WQUEEN 56
+#define WROOK 48 //?
+#define WBISHOP 12
+#define WKNIGHT 9
+#define WPAWN 24
+#define BKING 120
+#define BQUEEN 72
 #define BROOK 'r'
 #define BBISHOP 'b'
 #define BKNIGHT 'n'
 #define BPAWN 'p'
 #define ENPASSANT 'X'
 
-#define EMPTY '.'
-
-//-------------data indexes----------------
-
-#define WHITEMOVE 
-#define WHITEPIECE(index) square & 0x7F
-//-------
+//------------------------------------------
 
 
 #define OUTOFBOUNDS(square) square & 0x88  //10001000
@@ -36,19 +36,41 @@
 
 
 typedef struct Board
-{   square white[128];
-    square black[128]
+{   square board[128];
 }Board;
-
-_Bool isWhileMove(Board *b)
-{   
-    return b->white[]
-}
 
 void board_init(Board *b){b = calloc(1, sizeof(Board));}
 
+enum state
+{   WHITEMOVE = 1;
+    
+    WOO = 2; //castling rights
+    WOOO = 4;
+    BOO = 8;
+    BOOO = 0xF;
+    
+    
+}
+
+_Bool isWhiteMove(Board *b){return (_Bool)b->board[63] & 1;}
+
 void pawnMoves(move *moves, int *n, Board *b)
 {   _Bool iswhitemove = isWhiteMove(b);
+    square *pawn;
+    
+    if(isWhiteMove)
+        pawn = &b->board[WPAWN]; //
+    else
+        pawn = &b->board[BPAWN];
+
+    for(int i=0; i<8; i++, pawn++)
+    {   if(!pawn)
+            continue;
+        if(*pawn & 1)
+        if(*pawn & 2)
+        if(*pawn & 4)
+        if(*pawn & 8)
+    }
 }
 void kingMoves(move *moves, int *n, Board *b){}
 void queenMoves(move *moves, int *n, Board *b){}
