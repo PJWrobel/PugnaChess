@@ -2,6 +2,7 @@
 * board.c
 * Bitboard Layout
 *
+*
 * Bitboard orientation:  "b5" := ( x=1, y=4 )  
 */
 
