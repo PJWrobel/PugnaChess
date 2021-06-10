@@ -91,7 +91,7 @@ typedef struct Board
 }Board;
 
 int board_init(Board *b) //init clear board
-{   *b = calloc(1, sizeof(Board));
+{   b = calloc(1, sizeof(Board));
     return 0;
 }
 
@@ -111,13 +111,15 @@ void addPiece(struct pieceList *list, BitEnum type, BitBoard square)//list as pa
     list->bbList[ LOG2[ type ]] |= square;
 }
 
-piece* pieces(int *returnSize, struct pieceList list)
+piece* pieces(int *returnSize, struct pieceList list)//TODO: handle error: too many pieces (> 16 pieces)
 {   *returnSize = 0;
     piece *retList = calloc(17, sizeof(piece));
+    
     for(int i=0; i<6; i++)                          //sizeof(pieceList.bbList)
     {   for(BitBoard bb = list.bbList[i]; bb; *returnSize += 1)
         {   retList[*returnSize].type = bitscan(list.pieces);
             retList[*returnSize].square = bitscan(bb);
+            printf("%c", BitEnumToChar(retList[*returnSize].type));
             bb ^= retList[*returnSize].square;
             if(!bb)
                 list.pieces ^= retList[*returnSize].type;
@@ -131,10 +133,10 @@ void printBoard(Board board, _Bool pretty)
     int WMat, BMat; //white and black material
     char grid[8][8];
     int *coords;
-
+    
     piece *white = pieces(&WMat, board.white); //list of individual pieces of len WMat
     piece *black = pieces(&BMat, board.black);
-
+    
     //printPieces(board.white); //print each bitboard
     //printf("Black:\n");
     //printPieces(board.black);
@@ -302,7 +304,7 @@ Board fenToBoard(char *fen)
 }
 
 int main(int argc, char *argv[])
-{   char *fen = "r1bqkb1r/pppp1ppp/2Bn4/4p3/3P4/5N2/PPP2PPP/RNBQ1RK1 w - - 0 11";
+{   char *fen = "r1bqkb1r/pppp1ppp/2Bn4/4p3/3P4/5N2/PPPP1PPP/RNBQ1RK1 w - - 0 11";
     Board board = fenToBoard(fen);
     printBoard(board,true);
 

@@ -6,6 +6,9 @@
 
 BitBoard coordToBB(int row, int col);
 int* BBToCoord(BitBoard bb);
+_Bool isPopCnt1(BitBoard bb);
+size_t popCount(BitBoard bb);
+size_t popCountFast(BitBoard bb);
 void printBB(BitBoard bb); 
 
 #endif
