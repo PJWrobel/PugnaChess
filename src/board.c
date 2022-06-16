@@ -81,17 +81,17 @@ struct pieceList
     BitBoard bbList[6];
 };
 
-typedef struct Board
+typedef struct Position
 {   struct pieceList white;
     struct pieceList black;
     BitBoard Wall;
     BitBoard Ball;
     BitEnum state;
     BitBoard passant;
-}Board;
+}Position;
 
-int board_init(Board *b) //init clear board
-{   b = calloc(1, sizeof(Board));
+int board_init(Position *b) //init clear board
+{   b = calloc(1, sizeof(Position));
     return 0;
 }
 
@@ -104,7 +104,7 @@ void printPieces(struct pieceList pl)
     }
 }
 
-//uint64_t BoardToHash(Board b){}
+//uint64_t BoardToHash(Position b){}
 
 void addPiece(struct pieceList *list, BitEnum type, BitBoard square)//list as param for color handling
 {   list->pieces |= type;
@@ -128,7 +128,7 @@ piece* pieces(int *returnSize, struct pieceList list)//TODO: handle error: too m
     return retList;
 }
 
-void printBoard(Board board, _Bool pretty)
+void printBoard(Position board, _Bool pretty)
 {   
     int WMat, BMat; //white and black material
     char grid[8][8];
@@ -182,9 +182,9 @@ void printBoard(Board board, _Bool pretty)
     }
 }
 
-Board fenToBoard(char *fen)
+Position fenToBoard(char *fen)
 {   
-    Board returnBoard;
+    Position returnBoard;
     board_init(&returnBoard);
     BitBoard mask;
 
@@ -299,15 +299,15 @@ Board fenToBoard(char *fen)
     }
     fen++;
     //int moves = atoi(fen);
-    puts("Sucess!");
+    puts("Successfully loaded FEN");
     return returnBoard;
 }
 
 int main(int argc, char *argv[])
 {   char *fen = "r1bqkb1r/pppp1ppp/2Bn4/4p3/3P4/5N2/PPPP1PPP/RNBQ1RK1 w - - 0 11";
-    Board board = fenToBoard(fen);
+    Position board = fenToBoard(fen);
     printBoard(board,true);
 
-    printf("%zu\n", sizeof(Board));
+    printf("%zu\n", sizeof(Position));
     return 0;
 }

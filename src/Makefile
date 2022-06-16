@@ -7,8 +7,11 @@ LINKS ?= bitboard.c
 SOURCE ?= board.c
 
 ifeq ($(BUILD), debug)
-	flags += -g
+	flags += -g -Og
 endif
+
+ifeq ($(BUILD), release)
+    flags += -O3
 
 $(PROJECT_NAME): $(SOURCE)
 	$(CC) -o $(PROJECT_NAME) $(SOURCE) $(FLAGS) $(LINKS)
