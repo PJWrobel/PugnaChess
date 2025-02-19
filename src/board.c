@@ -156,6 +156,7 @@ void printBoard(Position board, _Bool pretty)
     if(board.passant)
     {   coords = BBToCoord(board.passant);
         grid[coords[1]][coords[0]] = 'E';
+        free(coords);
     }
     
     //-----------------printing-------------------

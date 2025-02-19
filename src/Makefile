@@ -9,9 +9,9 @@ SOURCE ?= board.c
 ifeq ($(BUILD), debug)
 	flags += -g -Og
 endif
-
 ifeq ($(BUILD), release)
     flags += -O3
+endif
 
 $(PROJECT_NAME): $(SOURCE)
 	$(CC) -o $(PROJECT_NAME) $(SOURCE) $(FLAGS) $(LINKS)
